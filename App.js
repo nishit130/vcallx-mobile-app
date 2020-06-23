@@ -73,8 +73,8 @@ class App extends React.Component{
         },
         {
           urls: 'turn:numb.viagenie.ca',
-          credential: 'nishit130',
-          username: 'nishitlimbani130@gmail.com'
+          credential: [password],
+          username: [username]
         },
       ]
     }
