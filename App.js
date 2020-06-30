@@ -46,6 +46,7 @@ class App extends React.Component{
       remoteStream : null,
       meeting_id: "",
       client_password: "",
+      remoteBool : 0,
     }
     this.sdp
     this.socket = null
@@ -53,7 +54,7 @@ class App extends React.Component{
   }
   componentDidMount = () => {
     this.socket = io.connect(
-      'https://87e4b6c01fb7.ngrok.io/webrtcPeer',
+      'https://6fa8600e4ab8.ngrok.io/webrtcPeer',
       {
         // path: '/vcallx-web',
         query: {}
@@ -79,27 +80,14 @@ class App extends React.Component{
         meeting_id : password
       })
     })
-    const pc_config = {
-      "iceServers": [
-        {
-          urls : 'stun:stun.l.google.com:19302'
-        },
-        {
-          urls: 'turn:numb.viagenie.ca',
-          credential:"nishit130",
-          username: "nishitlimbani130@gmail.com"
-        },
-      ]
-    }
-    this.pc = new RTCPeerConnection(pc_config)
-    this.pc.onicecandidate = (e) => {
-      // if(e.candidate) console.log(JSON.stringify(e.candidate))
+    this.socket.on('disconnect-call',(data) => {
+      this.disconnect();
+    })
+    
+    this.createPc();
+    } 
 
-      if(e.candidate){
-        this.sendToPeer('candidate', e.candidate)
-      }
-    }
-    this.pc.onaddstream = (e) => {
+    handleOnaddstreamEvent = (e) => {
       // console.log("remote srcObject", e.streams)
        //this.remoteVideoref.current.srcObject = e.stream
        debugger
@@ -107,8 +95,39 @@ class App extends React.Component{
        this.setState({
          remoteStream : e.stream,
        })
+       if(this.state.remoteStream)
+       {
+       	this.setState({remoteBool : 1})
+	}
      }
-     let isFront = true;
+     handleICEcandidatesEvent = (e) => {
+      // if(e.candidate) console.log(JSON.stringify(e.candidate))
+
+      if(e.candidate){
+        this.sendToPeer('candidate', e.candidate)
+      }
+    }
+
+    createPc = () => {
+      const pc_config = {
+        "iceServers": [
+          {
+            urls : 'stun:stun.l.google.com:19302'
+          },
+          {
+            urls: 'turn:numb.viagenie.ca',
+            credential:"nishit130",
+            username: "nishitlimbani130@gmail.com"
+          },
+        ]
+      }
+      this.pc = new RTCPeerConnection(pc_config)
+      this.pc.onicecandidate = this.handleICEcandidatesEvent;
+      this.pc.onaddstream = this.handleOnaddstreamEvent;
+    }
+    setLocalVideo = () => {
+    	console.log('setLocalVideo called')
+      let isFront = true;
       mediaDevices.enumerateDevices().then(sourceInfos => {
         console.log(sourceInfos);
         let videoSourceId;
@@ -142,8 +161,7 @@ class App extends React.Component{
           console.log("Stream Error: ",streamError)
         });
         });
-    } 
-
+    }
         makeid(length) {
           var result           = '';
           var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -162,7 +180,7 @@ class App extends React.Component{
         }
         createOffer = () => {
           console.log('offer')
-         
+        this.setLocalVideo();
           this.pc.createOffer({offerToReceiveVideo:1,offerToReceiveAudio:1}).then(sdp => {
             // console.log(JSON.stringify(sdp))
             var password = 'a'
@@ -173,10 +191,9 @@ class App extends React.Component{
             console.log("pass: ",this.state.password_client)
           }).then(() => console.log("call sucess: "),(err) => console.log("call error: ",err)
           )
-         
-          console.log("pass: ",this.pc.getStats((stats) => console.log("stats",stats)))
-          this.props.navigation.navigate('call', {remoteStream: this.state.remoteStream,localStream: this.state.localStream,pc : this.pc,})
+         this.setLocalVideo()
         }
+
         setRemoteDescription = () => {
           const desc = JSON.parse(this.sdp)
           this.pc.setRemoteDescription(new RTCSessionDescription(desc)).then(() => console.log("remote descp added"))
@@ -185,6 +202,8 @@ class App extends React.Component{
         createAnswer = () => {
           if(this.state.meeting_id == this.state.client_password)
           {
+          
+            this.setLocalVideo();
             this.pc.createAnswer({offerToReceiveVideo: 1, offerToReceiveAudio: 1}).then(sdp => {
               // console.log(JSON.stringify(sdp)
               this.sendToPeer('offerOrAnswer', sdp)
@@ -192,12 +211,33 @@ class App extends React.Component{
             }).then(() => console.log("sucess call"), (err) => console.log("answer error",err)
             
             )
-            this.props.navigation.navigate('call', {remoteStream: this.state.remoteStream,localStream: this.state.localStream, pc : this.pc})
           }
           else{
             console.log("pass dint matchn you entered", this.state.meeting_id)
-            this.props.navigation.navigate('call')
-          }
+            }
+	   
+        }
+        disconnect = () => {
+            this.pc.close();
+            //this.state.localStream.getTracks().forEach(track => track.stop())
+            if(this.state.remoteStream)
+            {
+              this.state.remoteStream.getTracks().forEach(track => track.stop())
+              this.state.remoteStream = null;
+            }
+            if(this.state.localStream)
+            {
+              this.state.localStream.getTracks().forEach(track => track.stop())
+              this.state.localStream = null;
+            }
+            if(this.pc)
+            {
+              this.pc.onaddstream = null;
+              this.pc.onicecandidate = null;
+              this.pc.close();
+              this.pc = null;
+            }
+            this.createPc();
         }
         addCandidate = () => {
           // const candidate = JSON.parse(this.textref.value)
@@ -214,19 +254,14 @@ class App extends React.Component{
       remoteStream,
     } = this.state
     const { navigate } = this.props.navigation
-    const remoteVideo = remoteStream ?
+    const remoteVideo = remoteStream && localStream ?
       (
-        <RTCView
-          key={2}
-          mirror={true}
-          style={{backgroundColor: 'black',height:dimensions.height,width:dimensions.width }}
-          objectFit='cover'
-          streamURL={remoteStream && remoteStream.toURL()}
-        />
+         this.props.navigation.navigate('call', {remoteStream: this.state.remoteStream,localStream: this.state.localStream, pc : this.pc})
+          
       ) :
       (
         <View style={{ padding: 15, }}>
-          <Text style={{ fontSize:22, textAlign: 'center', color: 'white' }}>Waiting for Peer connection ...{this.state.client_password}</Text>
+          <Text style={{ fontSize:22, textAlign: 'center', color: 'black' }}>Waiting for Peer connection ...{this.state.client_password}</Text>
         </View>
       )
     return (
@@ -237,7 +272,9 @@ class App extends React.Component{
         <SafeAreaView style={{flex:1,flexDirection:'row',margin:20}}>
         <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={this.createOffer}><Text style={{fontSize:25}}>call</Text></TouchableOpacity>
         <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={this.createAnswer}><Text style={{fontSize:25}}>answer</Text></TouchableOpacity>
+        <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={() => {this.disconnect(); this.sendToPeer('disconnect-call', '');}}><Text style={{fontSize:25}}>cut</Text></TouchableOpacity>
         </SafeAreaView>
+         {remoteVideo}
       </SafeAreaView>
     );
   }

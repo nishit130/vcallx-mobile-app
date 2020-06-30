@@ -48,14 +48,20 @@ class callScreen extends React.Component{
     this.sdp
     this.socket = null
     this.candidates = []
+    
+    this.setState({
+  	localStream : this.props.route.params.localStream,
+  	remoteStream : this.props.route.params.remoteStream,
+	})
   }
-
-  stopConnection = () => {
-    console.log(this.props.route.params.pc)
-    this.props.route.params.pc.getTransceivers().forEach((transceiver) => {
-      transceiver.stop();
-    });
-  }
+  
+  // stopConnection = () => {
+  //   console.log(this.props.route.params.pc)
+  //   this.props.route.params.pc.close();
+    
+  // }
+  
+ 
   render()
   {
     const {
@@ -68,10 +74,12 @@ class callScreen extends React.Component{
         <RTCView
           key={2}
           mirror={true}
+      	  objectFit='contain'
           style={{backgroundColor: 'black',height:dimensions.height,width:dimensions.width}}
           zOrder={0}
           streamURL={remoteStream && remoteStream.toURL()}
         />
+
       ) :
       (
         <View style={{ padding: 15, }}>
@@ -98,9 +106,6 @@ class callScreen extends React.Component{
             streamURL={localStream && localStream.toURL()}
             zOrder={100}
             />
-         </View>
-         <View style={{flex:1,flexDirection:'row',backgroundColor:'yellow',height:100,width:dimensions.width}}>
-            <TouchableOpacity style={{flex:1,flexDirection:'row'}} onPress={this.stopConnection}><Text>answer</Text></TouchableOpacity>
          </View>
       </View>
     );
