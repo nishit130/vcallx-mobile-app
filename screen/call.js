@@ -60,7 +60,36 @@ class callScreen extends React.Component{
   //   this.props.route.params.pc.close();
     
   // }
-  
+  sendToPeer = (messageType, payload) => {
+    this.props.route.params.socket.emit(messageType, {
+      socketID : this.props.route.params.socket.id,
+      payload
+    })
+  }
+  disconnect = () => {
+    console.log('disconnect is called in call.js')
+    this.props.route.params.pc.close();
+            //this.state.localStream.getTracks().forEach(track => track.stop())
+    if(this.state.remoteStream)
+    {
+      this.state.remoteStream.getTracks().forEach(track => track.stop())
+      this.state.remoteStream = null;
+    }
+    if(this.state.localStream)
+    {
+      this.state.localStream.getTracks().forEach(track => track.stop())
+      //this.state.localStream = null;
+    }
+    if(this.props.route.params.pc)
+    {
+      this
+      this.props.route.params.pc.onaddstream = null;
+      this.props.route.params.pc.onicecandidate = null;
+      this.props.route.params.pc.close();
+      this.props.route.params.pc = null;
+    }
+    this.props.navigation.navigate('home')
+  }
  
   render()
   {
@@ -68,7 +97,11 @@ class callScreen extends React.Component{
       localStream,
       remoteStream,
     } = this.props.route.params
-    
+    console.log('localStream : ', localStream)
+    // this.setState({
+    //   localStream : this.props.route.params.localStream,
+    //   remoteStream : this.props.route.params.remoteStream,
+    // })
     const remoteVideo = remoteStream ?
       (
         <RTCView
@@ -106,6 +139,9 @@ class callScreen extends React.Component{
             streamURL={localStream && localStream.toURL()}
             zOrder={100}
             />
+         </View>
+         <View>
+           <TouchableOpacity style={{borderColor:'white',borderWidth:2,height:50}}><Text style={{color:'white',fontSize:20}} onPress={() => {this.disconnect(); this.sendToPeer('disconnect-call','');}}>Cut the Crap</Text></TouchableOpacity>
          </View>
       </View>
     );
