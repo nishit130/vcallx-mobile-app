@@ -46,16 +46,16 @@ class App extends React.Component{
       remoteStream : null,
       meeting_id: "",
       client_password: "",
-      remoteBool : false,
     }
     this.sdp
     this.socket = null
     this.candidates = []
+    this.remoteBool = false;
   }
   componentDidMount = () => {
     console.log('comonent di mount app.js')
     this.socket = io.connect(
-      'https://74d5f7176999.ngrok.io/webrtcPeer',
+      'https://d7352b6c0d0c.ngrok.io/webrtcPeer',
       {
         // path: '/vcallx-web',
         query: {}
@@ -70,11 +70,15 @@ class App extends React.Component{
       this.pc.setRemoteDescription(new RTCSessionDescription(sdp))
     })
     this.socket.on('candidate', (candidate) => {
-      //this.candidates = [...this.candidates, candidate]
       //console.log(candidate)
       this.pc.addIceCandidate(new RTCIceCandidate(candidate)).then(() => console.log("candidate added suscessfull"),(err) => console.log("candidate error: ",err)
       
       )
+      if(this.remoteBool)
+      {
+      	this.remoteBool = false;
+       this.accepted()
+       }
     })
     this.socket.on('password',(password) => {
       this.setState({
@@ -84,6 +88,9 @@ class App extends React.Component{
     this.socket.on('disconnect-call',(data) => {
       this.disconnect();
     })
+    this.socket.on('accepted-call',(data) => {
+    	this.remoteBool = true;
+    	})
     this.setLocalVideo();
     this.createPc();
     
@@ -113,8 +120,8 @@ class App extends React.Component{
           },
           {
             urls: 'turn:numb.viagenie.ca',
-            credential:"",
-            username: ""
+            credential:"nishit130",
+            username: "nishitlimbani130@gmail.com"
           },
         ]
       }
@@ -180,13 +187,13 @@ class App extends React.Component{
             payload
           })
         }
+        
         createOffer = () => {
+          this.setState({remoteBool : true})
           this.setstream();
           if(this.pc == null)
-          {
-            this.createPc();
-            console.log('offer')
-          }
+            {this.createPc();
+            console.log('offer')}
           
           this.pc.createOffer({offerToReceiveVideo:1}).then(sdp => {
             // console.log(JSON.stringify(sdp))
@@ -196,10 +203,10 @@ class App extends React.Component{
             this.sendToPeer('password',password)
             this.setState({client_password : password})
             console.log("pass: ",this.state.password_client)
-          }).then(() => console.log("call sucess: "),(err) => console.log("call error: ",err)
+          }).then(() => console.log("call sucess: "),(err) => console.log("call error: ",this.pc,err)
           )
         }
-
+	
         setRemoteDescription = () => {
           const desc = JSON.parse(this.sdp)
           this.pc.setRemoteDescription(new RTCSessionDescription(desc)).then(() => console.log("remote descp added"))
@@ -214,8 +221,8 @@ class App extends React.Component{
               // console.log(JSON.stringify(sdp)
               this.sendToPeer('offerOrAnswer', sdp)
               this.pc.setLocalDescription(sdp)
-            }).then(() => console.log("sucess call"), (err) => console.log("answer error",err)
-            
+            }).then(() => this.props.navigation.navigate('call', {remoteStream:this.state.remoteStream,localStream: this.state.localStream, pc : this.pc})
+, (err) => console.log("answer error",err)
             )
           }
           else{
@@ -244,33 +251,40 @@ class App extends React.Component{
               this.pc.close();
               this.pc = null;
             }
+            this.candidates = [];
             this.createPc();
             this.setLocalVideo();
             this.setstream();
         }
         addCandidate = () => {
           // const candidate = JSON.parse(this.textref.value)
-          // console.log('Adding candidate:', candidate)
+          console.log('Adding candidate:', candidate)
           this.candidates.forEach(candidate => {
             //console.log(JSON.stringify(candidate))
             this.pc.addIceCandidate(new RTCIceCandidate(candidate))
           })
         }
+        accepted = () => {
+        console.log('remote',this.candidates)
+        	this.props.navigation.navigate('call', {remoteStream:this.state.remoteStream,localStream: this.state.localStream, pc : this.pc})
+    	
+	}
+     
   render()
   {
     const {
       localStream,
       remoteStream,
+      remoteBool
     } = this.state
     const { navigate } = this.props.navigation
     console.log(this.state.localStream)
     // if(!this.state.localStream){
     //   this.setLocalVideo();
     // }
-    if((remoteStream && this.state.meeting_id == this.state.client_password) || (this.state.meeting_id == this.state.client_password && this.state.client_password != ""))
+    if(this.pc)
     {
-      //this.setState({remoteBool: false})
-      this.props.navigation.navigate('call', {remoteStream: this.state.remoteStream,localStream: this.state.localStream, pc : this.pc,socket: this.socket})
+    	console.log('signaling-State ',this.pc.signalingState)
     }
     const remoteVideo = localStream && remoteStream ?
       (
