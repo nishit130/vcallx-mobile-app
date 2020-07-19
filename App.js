@@ -17,7 +17,7 @@ import {
   StatusBar,
   TouchableOpacity,
   Dimensions,
-  SafeAreaViewBase
+  SafeAreaViewBase,
 } from 'react-native';
 import {
   RTCPeerConnection,
@@ -33,6 +33,8 @@ import {createStackNavigator} from '@react-navigation/stack'
 import  {NavigationContainer} from '@react-navigation/native'
 import io from 'socket.io-client';
 import callScreen from './screen/call'
+import LoginScreen from './screen/login';
+import AuthenticationStack from './screen/authScreenStack'
 
 const dimensions = Dimensions.get('window')
 
@@ -44,8 +46,11 @@ class App extends React.Component{
     this.state = {
       localStream : null,
       remoteStream : null,
-      meeting_id: "",
-      client_password: "",
+      username: "",
+      password: "",
+      reciver : "",
+      caller: "",
+      login: false,
     }
     this.sdp
     this.socket = null
@@ -55,7 +60,7 @@ class App extends React.Component{
   componentDidMount = () => {
     console.log('comonent di mount app.js')
     this.socket = io.connect(
-      'https://d7352b6c0d0c.ngrok.io/webrtcPeer',
+      'https://22994fc3a4ab.ngrok.io/webrtcPeer',
       {
         // path: '/vcallx-web',
         query: {}
@@ -64,7 +69,9 @@ class App extends React.Component{
     this.socket.on('connection-success', success => {
       console.log("success",success)
     })
-    this.socket.on('offerOrAnswer', (sdp) => {
+    this.socket.on('offerOrAnswer', (username,sdp) => {
+      this.setState({caller : username})
+      console.log('callers username is', username);
       this.sdp = JSON.stringify(sdp)
       //console.log(sdp)
       this.pc.setRemoteDescription(new RTCSessionDescription(sdp))
@@ -80,11 +87,6 @@ class App extends React.Component{
        this.accepted()
        }
     })
-    this.socket.on('password',(password) => {
-      this.setState({
-        meeting_id : password
-      })
-    })
     this.socket.on('disconnect-call',(data) => {
       this.disconnect();
     })
@@ -95,7 +97,23 @@ class App extends React.Component{
     this.createPc();
     
     } 
+    handleiceState = (e) => {
+    	console.log('ice state ',this.pc.iceConnectionState)
+    	if(this.pc.iceConnectionState == 'completed' || this.pc.iceConnectionState == 'connected')
+    	{
+    		this.props.navigation.navigate('call', {remoteStream:this.state.remoteStream,localStream: this.state.localStream, pc : this.pc,socket:this.socket})
+	}
+	
+	if(this.pc.iceConnectionState == 'disconnected' || this.pc.iceConnectionState == 'closed')
+    	{
+    		console.log('state dis in app.js')
+    		this.disconnect();
+	}
+}
 
+    onLogin = (value) => {
+      this.setState({login: value})
+    }
     handleOnaddstreamEvent = (e) => {
       // console.log("remote srcObject", e.streams)
        //this.remoteVideoref.current.srcObject = e.stream
@@ -120,14 +138,15 @@ class App extends React.Component{
           },
           {
             urls: 'turn:numb.viagenie.ca',
-            credential:"nishit130",
-            username: "nishitlimbani130@gmail.com"
+            credential:"",
+            username: "@gmail.com"
           },
         ]
       }
       this.pc = new RTCPeerConnection(pc_config)
       this.pc.onicecandidate = this.handleICEcandidatesEvent;
       this.pc.onaddstream = this.handleOnaddstreamEvent;
+      this.pc.oniceconnectionstatechange = this.handleiceState;
     }
     setLocalVideo = () => {
       console.log('setLocalVideo called')
@@ -181,11 +200,24 @@ class App extends React.Component{
           return result;
         }
 
-        sendToPeer = (messageType, payload) => {
-          this.socket.emit(messageType, {
-            socketID : this.socket.id,
-            payload
-          })
+        sendToPeer = (messageType, payload,username) => {
+          if(messageType === 'offerOrAnswer')
+          {
+            //console.log('reciver:',this.reciver);
+            this.socket.emit(messageType,{
+              username: username,
+              socketID : this.socket.id,
+              payload,
+            })
+          }
+          else
+          {
+            console.log('offer wala nahi hai ye')
+            this.socket.emit(messageType, {
+              socketID : this.socket.id,
+              payload
+            })
+          }
         }
         
         createOffer = () => {
@@ -196,13 +228,9 @@ class App extends React.Component{
             console.log('offer')}
           
           this.pc.createOffer({offerToReceiveVideo:1}).then(sdp => {
-            // console.log(JSON.stringify(sdp))
-            var password = 'a'
+            console.log(JSON.stringify(sdp))
             this.pc.setLocalDescription(sdp).then(() => console.log("local descp added"))
-            this.sendToPeer('offerOrAnswer', sdp)
-            this.sendToPeer('password',password)
-            this.setState({client_password : password})
-            console.log("pass: ",this.state.password_client)
+            this.sendToPeer('offerOrAnswer', sdp,this.state.reciver)
           }).then(() => console.log("call sucess: "),(err) => console.log("call error: ",this.pc,err)
           )
         }
@@ -213,23 +241,17 @@ class App extends React.Component{
         }
       
         createAnswer = () => {
-          if(this.state.meeting_id == this.state.client_password)
-          {
+          console.log('answer func ',this.state.localStream)
+          if(this.pc == null)
+          {this.createPc();}
             this.setstream();
             this.setState({remoteBool : true});
             this.pc.createAnswer({offerToReceiveVideo: 1}).then(sdp => {
-              // console.log(JSON.stringify(sdp)
-              this.sendToPeer('offerOrAnswer', sdp)
+              this.sendToPeer('offerOrAnswer', sdp, this.state.caller)
               this.pc.setLocalDescription(sdp)
-            }).then(() => this.props.navigation.navigate('call', {remoteStream:this.state.remoteStream,localStream: this.state.localStream, pc : this.pc})
-, (err) => console.log("answer error",err)
-            )
+            })
           }
-          else{
-            console.log("pass dint matchn you entered", this.state.meeting_id)
-            }
-	   
-        }
+        //}
         disconnect = () => {
             console.log('disconnect function is called')
             this.pc.close();
@@ -266,7 +288,7 @@ class App extends React.Component{
         }
         accepted = () => {
         console.log('remote',this.candidates)
-        	this.props.navigation.navigate('call', {remoteStream:this.state.remoteStream,localStream: this.state.localStream, pc : this.pc})
+        	
     	
 	}
      
@@ -282,52 +304,54 @@ class App extends React.Component{
     // if(!this.state.localStream){
     //   this.setLocalVideo();
     // }
-    if(this.pc)
-    {
-    	console.log('signaling-State ',this.pc.signalingState)
-    }
     const remoteVideo = localStream && remoteStream ?
       (
         <View style={{ padding: 15, }}>
-          <Text style={{ fontSize:22, textAlign: 'center', color: 'black' }}>Call is on going ...{this.state.client_password}</Text>
+          <Text style={{ fontSize:22, textAlign: 'center', color: 'black' }}>Call is on going ...</Text>
         </View>
       ) :
       (
         <View style={{ padding: 15, }}>
-          <Text style={{ fontSize:22, textAlign: 'center', color: 'black' }}>Waiting for Peer connection ...{this.state.client_password}</Text>
+          <Text style={{ fontSize:22, textAlign: 'center', color: 'black' }}>Waiting for Peer connection ...</Text>
         </View>
       )
-    return (
-      <SafeAreaView style={{flex:1,flexDirection:'column',height:dimensions.height,width:dimensions.width,backgroundColor:'transparent'}}> 
-      <SafeAreaView style={{flex:1,flexDirection:'row',alignItems:'flex-end'}}>
-        <TextInput placeholder="Enter call ID" style={{flex:1,fontSize:30,backgroundColor:'transparent',borderBottomWidth:2,height:50,justifyContent:'center',margin:10}} onChangeText={(text) => this.setState({client_password: text})}/>
+      return (
+        <SafeAreaView style={{flex:1,flexDirection:'column',height:dimensions.height,width:dimensions.width,backgroundColor:'transparent'}}> 
+                <TextInput placeholder="username" style={{flex:1,fontSize:30,backgroundColor:'transparent',borderBottomWidth:2,height:50,justifyContent:'center',margin:10}} onChangeText={(text) => this.setState({username: text})}/>
+                <TextInput placeholder="password" style={{flex:1,fontSize:30,backgroundColor:'transparent',borderBottomWidth:2,height:50,justifyContent:'center',margin:10}} onChangeText={(text) => this.setState({password: text})}/>
+
+          <TextInput placeholder="Enter caller username" style={{flex:1,fontSize:30,backgroundColor:'transparent',borderBottomWidth:2,height:50,justifyContent:'center',margin:10}} onChangeText={(text) => this.setState({reciver: text})}/>
+        <SafeAreaView style={{flex:1,flexDirection:'row',alignItems:'flex-end'}}>
+          </SafeAreaView>
+          <SafeAreaView style={{flex:1,flexDirection:'row',margin:20}}>
+          <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={() => {this.socket.emit('addUser', {socketID:this.socket.id,username: this.state.username, password: this.state.password});}}><Text style={{fontSize:25}}>login</Text></TouchableOpacity>
+          <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={this.createOffer}><Text style={{fontSize:25}}>call</Text></TouchableOpacity>
+          <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={this.createAnswer}><Text style={{fontSize:25}}>answer</Text></TouchableOpacity>
+          <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={() => {this.disconnect(); this.sendToPeer('disconnect-call', '');}}><Text style={{fontSize:25}}>cut</Text></TouchableOpacity>
+          </SafeAreaView>
         </SafeAreaView>
-        <SafeAreaView style={{flex:1,flexDirection:'row',margin:20}}>
-        <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={this.createOffer}><Text style={{fontSize:25}}>call</Text></TouchableOpacity>
-        <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={this.createAnswer}><Text style={{fontSize:25}}>answer</Text></TouchableOpacity>
-        <TouchableOpacity style={{flex:1,borderRadius:30,borderWidth:2,height:40,alignItems:"center",margin:10}} onPress={() => {this.disconnect(); this.sendToPeer('disconnect-call', '');}}><Text style={{fontSize:25}}>cut</Text></TouchableOpacity>
-        </SafeAreaView>
-        <RTCView 
-            key={2}
-            objectFit='cover'
-            style={{height:100,width:100}}
-            streamURL={localStream && localStream.toURL()}
-            />
-         {remoteVideo}
-      </SafeAreaView>
-    );
+      );
   }
-};
+}
+
 const Stack = createStackNavigator();
 function MyStack() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator headerMode="none">
-        <Stack.Screen  name="home" component={App}/>
-        <Stack.Screen name="call" component={callScreen}/>
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+  if(false)
+  {
+    return(
+       <AuthenticationStack />
+    );
+  }
+  else{
+    return (
+        <NavigationContainer>
+          <Stack.Navigator headerMode="none">
+            <Stack.Screen  name="home" component={App}/>
+            <Stack.Screen name="call" component={callScreen}/>
+          </Stack.Navigator>
+        </NavigationContainer>
+    );
+  }
 }
 
 export default MyStack;

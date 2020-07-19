@@ -48,7 +48,7 @@ class callScreen extends React.Component{
     this.sdp
     this.socket = null
     this.candidates = []
-    
+    this.props.route.params.pc.oniceconnectionstatechange = this.handleiceState;
     this.setState({
   	localStream : this.props.route.params.localStream,
   	remoteStream : this.props.route.params.remoteStream,
@@ -60,12 +60,16 @@ class callScreen extends React.Component{
   //   this.props.route.params.pc.close();
     
   // }
-  sendToPeer = (messageType, payload) => {
-    this.props.route.params.socket.emit(messageType, {
-      socketID : this.props.route.params.socket.id,
-      payload
-    })
+  handleiceState = (e) => {
+  if(this.props.route.params.pc)
+  {
+    	if(this.props.route.params.pc.iceConnectionState == 'disconnected' || this.props.route.params.pc.iceConnectionState == 'closed')
+    	{
+    		this.props.navigation.navigate('home',{diss: 'true'})
+	}
   }
+}
+
   disconnect = () => {
     console.log('disconnect is called in call.js')
     this.props.route.params.pc.close();
@@ -82,13 +86,13 @@ class callScreen extends React.Component{
     }
     if(this.props.route.params.pc)
     {
-      this
       this.props.route.params.pc.onaddstream = null;
       this.props.route.params.pc.onicecandidate = null;
       this.props.route.params.pc.close();
-      this.props.route.params.pc = null;
     }
-    this.props.navigation.navigate('home')
+    this.props.route.params.pc = null;
+    this.props.navigation.navigate('home',{diss: 'true'})
+    
   }
  
   render()
@@ -108,7 +112,7 @@ class callScreen extends React.Component{
           key={2}
           mirror={true}
       	  objectFit='contain'
-          style={{backgroundColor: 'black',height:dimensions.height,width:dimensions.width}}
+          style={{backgroundColor: 'black',height:dimensions.height-50,width:dimensions.width}}
           zOrder={0}
           streamURL={remoteStream && remoteStream.toURL()}
         />
@@ -120,9 +124,9 @@ class callScreen extends React.Component{
         </View>
       )
     return (
-      <View style={{height:dimensions.height,width:dimensions.width,backgroundColor:'blue'}}> 
+      <View style={{height:dimensions.height,width:dimensions.width}}> 
 
-        <View style={{position:'relative',backgroundColor:'pink',zIndex:0,height:dimensions.height-100,width:dimensions.width}}>
+        <View style={{backgroundColor:'pink',zIndex:0,height:dimensions.height-100,width:dimensions.width}}>
             {/* <RTCView 
             key={2}
             objectFit='cover'
@@ -131,7 +135,7 @@ class callScreen extends React.Component{
             /> */}
             {remoteVideo}
         </View>         
-         <View style={{position:'absolute',height:200, width:150,backgroundColor:'blue',bottom:100,right:0,zIndex:100}}>
+         <View style={{position:'absolute',height:200, width:150,backgroundColor:'black',bottom:50,right:0}}>
             <RTCView
             key={1} 
             objectFit='cover'
@@ -140,8 +144,9 @@ class callScreen extends React.Component{
             zOrder={100}
             />
          </View>
-         <View>
-           <TouchableOpacity style={{borderColor:'white',borderWidth:2,height:50}}><Text style={{color:'white',fontSize:20}} onPress={() => {this.disconnect(); this.sendToPeer('disconnect-call','');}}>Cut the Crap</Text></TouchableOpacity>
+         <View style={{flex:1,flexDirection:'row',bottom:0,alignItems:'center'}}>
+           <TouchableOpacity style={{flex:1,borderColor:'white',borderWidth:2,alignItems:'center',justifyContent:'center',borderRadius:50,height:50,backgroundColor:'red'}}><Text style={{color:'white',fontSize:20}} onPress={this.disconnect}>Cut</Text></TouchableOpacity>
+           <TouchableOpacity style={{flex:1,borderColor:'white',borderWidth:2,alignItems:'center',justifyContent:'center',borderRadius:50,height:50,backgroundColor:'grey'}}><Text style={{color:'white',fontSize:20}} onPress={this.disconnect}>Mute</Text></TouchableOpacity>
          </View>
       </View>
     );
