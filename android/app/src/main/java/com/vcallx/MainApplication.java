@@ -11,6 +11,8 @@ import com.facebook.soloader.SoLoader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.oney.WebRTCModule.WebRTCModulePackage; //WebRTC package
+import com.facebook.react.bridge.JSIModulePackage; // Reanimated Package
+import com.swmansion.reanimated.ReanimatedJSIModulePackage; // Reanimated package
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -19,6 +21,10 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         public boolean getUseDeveloperSupport() {
           return BuildConfig.DEBUG;
+        }
+        @Override
+        protected JSIModulePackage getJSIModulePackage() {
+          return new ReanimatedJSIModulePackage(); // <- add
         }
 
         @Override

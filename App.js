@@ -17,6 +17,7 @@ import {
   Dimensions,
   ActivityIndicator,
   AsyncStorage,
+  ToastAndroid,
 } from 'react-native';
 import {
   RTCPeerConnection,
@@ -34,6 +35,7 @@ import io, {Socket} from 'socket.io-client';
 import callScreen from './screen/call';
 // import LoginScreen from './screen/logins';
 import AuthenticationStack from './screen/authScreenStack';
+import CallRecievedScreen from './screen/callScreen';
 
 const dimensions = Dimensions.get('window');
 
@@ -64,6 +66,12 @@ class App extends React.Component {
     });
     this.socket.on('offerOrAnswer', (username, sdp) => {
       this.setState({caller: username});
+      if (this.pc.signalingState === 'stable') {
+        this.props.navigation.navigate('callScreen', {
+          createAnswer: this.createAnswer,
+          disconnect: this.disconnect,
+        });
+      }
       console.log('callers username is', username);
       this.sdp = JSON.stringify(sdp);
       //console.log(sdp)
@@ -106,8 +114,8 @@ class App extends React.Component {
     }
 
     if (
-      this.pc.iceConnectionState == 'disconnected' ||
-      this.pc.iceConnectionState == 'closed'
+      this.pc.iceConnectionState === 'disconnected' ||
+      this.pc.iceConnectionState === 'closed'
     ) {
       console.log('state dis in app.js');
       this.disconnect();
@@ -141,7 +149,7 @@ class App extends React.Component {
         {
           urls: 'turn:numb.viagenie.ca',
           credential: 'password',
-          username: 'username',
+          username: 'email',
         },
       ],
     };
@@ -159,8 +167,8 @@ class App extends React.Component {
       for (let i = 0; i < sourceInfos.length; i++) {
         const sourceInfo = sourceInfos[i];
         if (
-          sourceInfo.kind == 'videoinput' &&
-          sourceInfo.facing == (isFront ? 'front' : 'environment')
+          sourceInfo.kind === 'videoinput' &&
+          sourceInfo.facing === (isFront ? 'front' : 'environment')
         ) {
           videoSourceId = sourceInfo.deviceId;
         }
@@ -373,7 +381,7 @@ class App extends React.Component {
             onPress={this.createOffer}>
             <Text style={{fontSize: 25}}>call</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               flex: 1,
               borderRadius: 30,
@@ -384,7 +392,7 @@ class App extends React.Component {
             }}
             onPress={this.createAnswer}>
             <Text style={{fontSize: 25}}>answer</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             style={{
               flex: 1,
@@ -490,7 +498,7 @@ class MyStack extends React.Component {
     console.log('ran eff');
     this.setState(
       {
-        socket: io.connect('https://842572ec6244.ngrok.io/webrtcPeer', {
+        socket: io.connect('https://aafe7836b5ac.ngrok.io/webrtcPeer', {
           query: {},
         }),
       },
@@ -515,34 +523,35 @@ class MyStack extends React.Component {
   }
   render() {
     console.log('socket: in main app ', this.state.socket.id);
-    if (this.state.loading) {
-      return <ActivityIndicator size="large" />;
+    // if (true) {
+    //   return <CallRecievedScreen />;
+    // } else {
+    if (!this.state.login) {
+      return (
+        <AuthenticationStack
+          socket={this.state.socket}
+          onLogin={this.onLogin}
+        />
+      );
     } else {
-      if (!this.state.login) {
-        return (
-          <AuthenticationStack
-            socket={this.state.socket}
-            onLogin={this.onLogin}
-          />
-        );
-      } else {
-        return (
-          <NavigationContainer>
-            <Stack.Navigator headerMode="none">
-              <Stack.Screen
-                name="home"
-                component={App}
-                initialParams={{
-                  socket: this.state.socket,
-                  onLogin: this.onLogin,
-                }}
-              />
-              <Stack.Screen name="call" component={callScreen} />
-            </Stack.Navigator>
-          </NavigationContainer>
-        );
-      }
+      return (
+        <NavigationContainer>
+          <Stack.Navigator headerMode="none">
+            <Stack.Screen
+              name="home"
+              component={App}
+              initialParams={{
+                socket: this.state.socket,
+                onLogin: this.onLogin,
+              }}
+            />
+            <Stack.Screen name="callScreen" component={CallRecievedScreen} />
+            <Stack.Screen name="call" component={callScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+      );
     }
+    // }
   }
 }
 
