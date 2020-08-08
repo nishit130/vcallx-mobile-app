@@ -11,7 +11,11 @@ import {
   Dimensions,
   ToastAndroid,
   AsyncStorage,
+  Image,
+  KeyboardAvoidingView,
 } from 'react-native';
+
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 class loginScreen extends React.Component {
   constructor(props) {
@@ -51,29 +55,68 @@ class loginScreen extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.banner}>
-          <Text style={styles.bannerText}>Vcallx Video calling app</Text>
+          <Image
+            style={{
+              flex: 1,
+              resizeMode: 'cover',
+            }}
+            source={require('../assets/img/video-call.png')}
+          />
         </View>
-        <View style={styles.form}>
-          <TextInput
-            style={styles.inputBox}
-            onChangeText={username => this.setState({username: username})}
-            underlineColorAndroid="rgba(0,0,0,0)"
-            placeholder="username"
-            placeholderTextColor="#002f6c"
-            selectionColor="#fff"
-            keyboardType="email-address"
-            onSubmitEditing={() => this.password.focus()}
-          />
-
-          <TextInput
-            style={styles.inputBox}
-            onChangeText={password => this.setState({password: password})}
-            underlineColorAndroid="rgba(0,0,0,0)"
-            placeholder="Password"
-            secureTextEntry={true}
-            placeholderTextColor="#002f6c"
-            ref={input => (this.password = input)}
-          />
+        <KeyboardAvoidingView behavior={'height'} style={{...styles.form}}>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Icon
+              style={{
+                flex: 0.1,
+                marginVertical: 10,
+              }}
+              name="account-outline"
+              size={30}
+              color="white"
+            />
+            <TextInput
+              style={{...styles.inputBox, flex: 0.9}}
+              onChangeText={username => this.setState({username: username})}
+              underlineColorAndroid="rgba(0,0,0,0)"
+              placeholder="Username"
+              placeholderTextColor="white"
+              selectionColor="#fff"
+              keyboardType="email-address"
+              onSubmitEditing={() => this.password.focus()}
+            />
+          </View>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Icon
+              style={{
+                flex: 0.1,
+                marginVertical: 10,
+              }}
+              name="lock"
+              size={30}
+              color="white"
+            />
+            <TextInput
+              style={{...styles.inputBox, flex: 0.9}}
+              onChangeText={password => this.setState({password: password})}
+              underlineColorAndroid="rgba(0,0,0,0)"
+              placeholder="Password"
+              secureTextEntry={true}
+              placeholderTextColor="white"
+              ref={input => (this.password = input)}
+            />
+          </View>
 
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText} onPress={this.onLogin}>
@@ -85,20 +128,22 @@ class loginScreen extends React.Component {
             onPress={() => this.props.navigation.navigate('signUp')}>
             Create Account
           </Text>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     );
   }
 }
+const dimensions = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#314CAC',
   },
   banner: {
-    flex: 1,
+    flex: 1.8,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -108,33 +153,37 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   form: {
+    marginTop: 20,
     flex: 1,
   },
   inputBox: {
-    width: 300,
-    backgroundColor: '#F4A4AB',
-    borderRadius: 25,
+    width: dimensions.width - 90,
+    backgroundColor: '#314CAC',
+    borderColor: 'white',
+    borderBottomWidth: 2,
     paddingHorizontal: 16,
     fontSize: 16,
     color: 'white',
     marginVertical: 10,
   },
   button: {
-    width: 300,
-    backgroundColor: '#E63946',
-    borderRadius: 25,
+    width: dimensions.width - 90,
+    borderWidth: 2,
+    borderColor: 'white',
     marginVertical: 10,
     paddingVertical: 12,
+    backgroundColor: 'white',
   },
   buttonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#ffffff',
+    color: '#314CAC',
     textAlign: 'center',
   },
   signUp: {
+    flex: 0.6,
     textAlign: 'center',
-    color: 'blue',
+    color: '#fafafa',
   },
 });
 export default loginScreen;

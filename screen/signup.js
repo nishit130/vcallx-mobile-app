@@ -6,6 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   AsyncStorage,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {YellowBox} from 'react-native';
 
@@ -38,16 +41,20 @@ class signupScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <View style={styles.banner}>
-          <Text style={styles.bannerText}>Vcallx Video calling app</Text>
-        </View>
+        <KeyboardAvoidingView
+          behavior={'height'}
+          style={{flex: 1, backgroundColor: 'white'}}>
+          <View style={styles.banner}>
+            <Text style={styles.bannerText}>Sign Up</Text>
+          </View>
+        </KeyboardAvoidingView>
         <View style={styles.form}>
           <TextInput
             style={styles.inputBox}
             onChangeText={username => this.setState({username: username})}
             underlineColorAndroid="rgba(0,0,0,0)"
-            placeholder="username"
-            placeholderTextColor="#002f6c"
+            placeholder="Username"
+            placeholderTextColor="#314CAC"
             selectionColor="#fff"
             keyboardType="email-address"
             onSubmitEditing={() => this.password.focus()}
@@ -59,7 +66,7 @@ class signupScreen extends React.Component {
             underlineColorAndroid="rgba(0,0,0,0)"
             placeholder="Password"
             secureTextEntry={true}
-            placeholderTextColor="#002f6c"
+            placeholderTextColor="#314CAC"
             ref={input => (this.password = input)}
           />
           <TextInput
@@ -70,61 +77,82 @@ class signupScreen extends React.Component {
             underlineColorAndroid="rgba(0,0,0,0)"
             placeholder="Confirm Password"
             secureTextEntry={true}
-            placeholderTextColor="#002f6c"
+            placeholderTextColor="#314CAC"
             ref={input => (this.confirm_password = input)}
           />
 
           <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText} onPress={this.onSignup}>
-              sign up
+              Sign up
             </Text>
           </TouchableOpacity>
+
+          <View style={{flex: 0.1, marginTop: 30}}>
+            <Text onPress={() => this.props.navigation.navigate('login')}>
+              Already have an account?
+            </Text>
+          </View>
         </View>
       </View>
     );
   }
 }
+const dimensions = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: '#314CAC',
   },
   banner: {
     flex: 1,
+    width: dimensions.width,
+    //borderRadius: 260,
+    backgroundColor: '#314CAC',
+    // borderBottomRightRadius: 200,
+    borderBottomLeftRadius: 95,
     justifyContent: 'center',
     alignItems: 'center',
   },
   bannerText: {
-    fontSize: 30,
+    fontSize: 35,
+    color: 'white',
     fontWeight: '800',
-    fontStyle: 'italic',
+    fontFamily: 'Exo2-SemiBold',
   },
   form: {
+    paddingTop: 70,
+    backgroundColor: 'white',
     flex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: dimensions.width - 0,
+    borderTopRightRadius: 95,
+    //borderTopLeftRadius: 35,
+    //borderWidth: 2,
   },
   inputBox: {
     width: 300,
-    backgroundColor: '#F4A4AB',
-    borderRadius: 25,
-    paddingHorizontal: 16,
+    borderBottomWidth: 2,
+    borderColor: '#314CAC',
     fontSize: 16,
-    color: 'white',
+    color: '#314CAC',
     marginVertical: 10,
   },
   button: {
     width: 300,
-    backgroundColor: '#E63946',
-    borderRadius: 25,
     marginVertical: 10,
     paddingVertical: 12,
+    borderColor: '#314CAC',
+    borderWidth: 2,
+    backgroundColor: '#314CAC',
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '500',
-    color: '#ffffff',
+    color: 'white',
     textAlign: 'center',
   },
   signUp: {

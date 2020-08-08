@@ -18,6 +18,7 @@ import {
   ActivityIndicator,
   AsyncStorage,
   ToastAndroid,
+  Image,
 } from 'react-native';
 import {
   RTCPeerConnection,
@@ -148,8 +149,8 @@ class App extends React.Component {
         },
         {
           urls: 'turn:numb.viagenie.ca',
-          credential: 'password',
-          username: 'email',
+          credential: '',
+          username: 'email@gmail.com',
         },
       ],
     };
@@ -204,16 +205,6 @@ class App extends React.Component {
       console.log('stream added!');
     }
   };
-  makeid(length) {
-    var result = '';
-    var characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
-      result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-  }
 
   sendToPeer = (messageType, payload, username) => {
     if (messageType === 'offerOrAnswer') {
@@ -314,23 +305,22 @@ class App extends React.Component {
   };
 
   render() {
-    const {localStream, remoteStream, remoteBool} = this.state;
-    const {navigate} = this.props.navigation;
+    const {localStream, remoteStream} = this.state;
     console.log(this.state.localStream);
-    const remoteVideo =
-      localStream && remoteStream ? (
-        <View style={{padding: 15}}>
-          <Text style={{fontSize: 22, textAlign: 'center', color: 'black'}}>
-            Call is on going ...
-          </Text>
-        </View>
-      ) : (
-        <View style={{padding: 15}}>
-          <Text style={{fontSize: 22, textAlign: 'center', color: 'black'}}>
-            Waiting for Peer connection ...
-          </Text>
-        </View>
-      );
+    // const remoteVideo =
+    //   localStream && remoteStream ? (
+    //     <View style={{padding: 15}}>
+    //       <Text style={{fontSize: 22, textAlign: 'center', color: 'black'}}>
+    //         Call is on going ...
+    //       </Text>
+    //     </View>
+    //   ) : (
+    //     <View style={{padding: 15}}>
+    //       <Text style={{fontSize: 22, textAlign: 'center', color: 'black'}}>
+    //         Waiting for Peer connection ...
+    //       </Text>
+    //     </View>
+    //   );
     return (
       <SafeAreaView
         style={{
@@ -498,7 +488,7 @@ class MyStack extends React.Component {
     console.log('ran eff');
     this.setState(
       {
-        socket: io.connect('https://aafe7836b5ac.ngrok.io/webrtcPeer', {
+        socket: io.connect('https://8c69a4dc8501.ngrok.io/webrtcPeer', {
           query: {},
         }),
       },
@@ -526,7 +516,8 @@ class MyStack extends React.Component {
     // if (true) {
     //   return <CallRecievedScreen />;
     // } else {
-    if (!this.state.login) {
+    if (false) {
+      //!this.state.login
       return (
         <AuthenticationStack
           socket={this.state.socket}
