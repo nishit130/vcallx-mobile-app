@@ -19,6 +19,7 @@ import {
   AsyncStorage,
   ToastAndroid,
   Image,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {
   RTCPeerConnection,
@@ -150,7 +151,7 @@ class App extends React.Component {
         {
           urls: 'turn:numb.viagenie.ca',
           credential: '',
-          username: 'email@gmail.com',
+          username: '',
         },
       ],
     };
@@ -306,7 +307,7 @@ class App extends React.Component {
 
   render() {
     const {localStream, remoteStream} = this.state;
-    console.log(this.state.localStream);
+    // console.log(this.state.localStream);
     // const remoteVideo =
     //   localStream && remoteStream ? (
     //     <View style={{padding: 15}}>
@@ -321,6 +322,8 @@ class App extends React.Component {
     //       </Text>
     //     </View>
     //   );
+
+    //blue color : #314CAC
     return (
       <SafeAreaView
         style={{
@@ -328,77 +331,92 @@ class App extends React.Component {
           flexDirection: 'column',
           height: dimensions.height,
           width: dimensions.width,
-          backgroundColor: 'transparent',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#314CAC',
         }}>
-        <TouchableOpacity
+        <View
           style={{
-            flex: 1,
-            borderRadius: 30,
-            borderWidth: 2,
-            height: 40,
-            alignItems: 'center',
-            margin: 10,
-          }}
-          onPress={this.logout}>
-          <Text style={{fontSize: 25}}>Logout</Text>
-        </TouchableOpacity>
-        <TextInput
-          placeholder="Enter caller username"
-          style={{
-            flex: 1,
-            fontSize: 30,
-            backgroundColor: 'transparent',
-            borderBottomWidth: 2,
-            height: 50,
-            justifyContent: 'center',
-            margin: 10,
-          }}
-          onChangeText={text => this.setState({reciver: text})}
-        />
-        <SafeAreaView
-          style={{flex: 1, flexDirection: 'row', alignItems: 'flex-end'}}
-        />
-        <SafeAreaView style={{flex: 1, flexDirection: 'row', margin: 20}}>
+            flex: 0.25,
+            flexDirection: 'row',
+            backgroundColor: '#314CAC',
+          }}>
           <TouchableOpacity
             style={{
               flex: 1,
-              borderRadius: 30,
-              borderWidth: 2,
-              height: 40,
               alignItems: 'center',
               margin: 10,
             }}
-            onPress={this.createOffer}>
-            <Text style={{fontSize: 25}}>call</Text>
+            onPress={this.logout}>
+            <Text style={{fontSize: 25, color: 'white'}}>Logout</Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
+        </View>
+        <KeyboardAvoidingView
+          style={{
+            flex: 0.75,
+            marginBottom: dimensions.height / 10,
+            borderRadius: 50,
+            backgroundColor: 'white',
+            width: dimensions.width - 50,
+          }}>
+          <Text
             style={{
-              flex: 1,
-              borderRadius: 30,
-              borderWidth: 2,
-              height: 40,
-              alignItems: 'center',
-              margin: 10,
-            }}
-            onPress={this.createAnswer}>
-            <Text style={{fontSize: 25}}>answer</Text>
-          </TouchableOpacity> */}
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              borderRadius: 30,
-              borderWidth: 2,
-              height: 40,
-              alignItems: 'center',
-              margin: 10,
-            }}
-            onPress={() => {
-              this.disconnect();
-              this.sendToPeer('disconnect-call', '');
+              flex: 2,
+              fontFamily: 'Exo2-Bold',
+              fontSize: 30,
+              color: '#314CAC',
+              textAlign: 'center',
             }}>
-            <Text style={{fontSize: 25}}>cut</Text>
-          </TouchableOpacity>
-        </SafeAreaView>
+            VcallX
+          </Text>
+          <View
+            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <TextInput
+              placeholder="Enter username"
+              style={{
+                flex: 1,
+                fontSize: 30,
+                borderColor: '#314CAC',
+                backgroundColor: 'transparent',
+                borderBottomWidth: 2,
+              }}
+              onChangeText={text => this.setState({reciver: text})}
+            />
+          </View>
+          <SafeAreaView
+            style={{
+              flex: 3,
+              flexDirection: 'row',
+              margin: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                borderRadius: 30,
+                backgroundColor: '#314CAC',
+                height: 40,
+                alignItems: 'center',
+                margin: 10,
+              }}
+              onPress={this.createOffer}>
+              <Text style={{fontSize: 25, color: 'white'}}>call</Text>
+            </TouchableOpacity>
+            {/* <TouchableOpacity
+              style={{
+                flex: 1,
+                borderRadius: 30,
+                borderWidth: 2,
+                height: 40,
+                alignItems: 'center',
+                margin: 10,
+              }}
+              onPress={this.createAnswer}>
+              <Text style={{fontSize: 25}}>answer</Text>
+            </TouchableOpacity> */}
+          </SafeAreaView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
