@@ -306,24 +306,6 @@ class App extends React.Component {
   };
 
   render() {
-    const {localStream, remoteStream} = this.state;
-    // console.log(this.state.localStream);
-    // const remoteVideo =
-    //   localStream && remoteStream ? (
-    //     <View style={{padding: 15}}>
-    //       <Text style={{fontSize: 22, textAlign: 'center', color: 'black'}}>
-    //         Call is on going ...
-    //       </Text>
-    //     </View>
-    //   ) : (
-    //     <View style={{padding: 15}}>
-    //       <Text style={{fontSize: 22, textAlign: 'center', color: 'black'}}>
-    //         Waiting for Peer connection ...
-    //       </Text>
-    //     </View>
-    //   );
-
-    //blue color : #314CAC
     return (
       <SafeAreaView
         style={{
@@ -351,7 +333,7 @@ class App extends React.Component {
             <Text style={{fontSize: 25, color: 'white'}}>Logout</Text>
           </TouchableOpacity>
         </View>
-        <KeyboardAvoidingView
+        <View
           style={{
             flex: 0.75,
             marginBottom: dimensions.height / 10,
@@ -370,6 +352,7 @@ class App extends React.Component {
             VcallX
           </Text>
           <View
+            behavior={'position'}
             style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
             <TextInput
               placeholder="Enter username"
@@ -416,7 +399,7 @@ class App extends React.Component {
               <Text style={{fontSize: 25}}>answer</Text>
             </TouchableOpacity> */}
           </SafeAreaView>
-        </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     );
   }
