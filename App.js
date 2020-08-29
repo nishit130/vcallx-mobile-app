@@ -62,16 +62,20 @@ class App extends React.Component {
     console.log('comonent di mount app.js');
     this.socket = this.props.route.params.socket;
     //console.log("socket from home: ",this.socket)
-    this.props.navigation.setParams({socket: this.socket});
+    this.props.navigation.setParams({
+      socket: this.socket,
+    });
     this.socket.on('connection-success', success => {
       console.log('success', success);
     });
     this.socket.on('offerOrAnswer', (username, sdp) => {
-      this.setState({caller: username});
+      this.setState({
+        caller: username,
+      });
       if (this.pc.signalingState === 'stable') {
         this.props.navigation.navigate('callScreen', {
           createAnswer: this.createAnswer,
-          disconnect: this.disconnect,
+          dissconect: this.disconnect,
         });
       }
       console.log('callers username is', username);
@@ -125,7 +129,9 @@ class App extends React.Component {
   };
 
   onLogin = value => {
-    this.setState({login: value});
+    this.setState({
+      login: value,
+    });
   };
   handleOnaddstreamEvent = e => {
     // console.log("remote srcObject", e.streams)
@@ -150,8 +156,8 @@ class App extends React.Component {
         },
         {
           urls: 'turn:numb.viagenie.ca',
-          credential: '',
-          username: '',
+          credential: ' ',
+          username: '@gmail.com',
         },
       ],
     };
@@ -185,7 +191,13 @@ class App extends React.Component {
               minFrameRate: 30,
             },
             facingMode: isFront ? 'user' : 'environment',
-            optional: videoSourceId ? [{sourceId: videoSourceId}] : [],
+            optional: videoSourceId
+              ? [
+                  {
+                    sourceId: videoSourceId,
+                  },
+                ]
+              : [],
           },
         })
         .then(stream => {
@@ -225,7 +237,9 @@ class App extends React.Component {
   };
 
   createOffer = () => {
-    this.setState({remoteBool: true});
+    this.setState({
+      remoteBool: true,
+    });
     this.setstream();
     if (this.pc == null) {
       this.createPc();
@@ -233,7 +247,9 @@ class App extends React.Component {
     }
 
     this.pc
-      .createOffer({offerToReceiveVideo: 1})
+      .createOffer({
+        offerToReceiveVideo: 1,
+      })
       .then(sdp => {
         console.log(JSON.stringify(sdp));
         this.pc
@@ -260,11 +276,17 @@ class App extends React.Component {
       this.createPc();
     }
     this.setstream();
-    this.setState({remoteBool: true});
-    this.pc.createAnswer({offerToReceiveVideo: 1}).then(sdp => {
-      this.sendToPeer('offerOrAnswer', sdp, this.state.caller);
-      this.pc.setLocalDescription(sdp);
+    this.setState({
+      remoteBool: true,
     });
+    this.pc
+      .createAnswer({
+        offerToReceiveVideo: 1,
+      })
+      .then(sdp => {
+        this.sendToPeer('offerOrAnswer', sdp, this.state.caller);
+        this.pc.setLocalDescription(sdp);
+      });
   };
   //}
   disconnect = () => {
@@ -330,7 +352,13 @@ class App extends React.Component {
               margin: 10,
             }}
             onPress={this.logout}>
-            <Text style={{fontSize: 25, color: 'white'}}>Logout</Text>
+            <Text
+              style={{
+                fontSize: 25,
+                color: 'white',
+              }}>
+              Logout
+            </Text>
           </TouchableOpacity>
         </View>
         <View
@@ -353,7 +381,11 @@ class App extends React.Component {
           </Text>
           <View
             behavior={'position'}
-            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            style={{
+              flex: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
             <TextInput
               placeholder="Enter username"
               style={{
@@ -363,7 +395,11 @@ class App extends React.Component {
                 backgroundColor: 'transparent',
                 borderBottomWidth: 2,
               }}
-              onChangeText={text => this.setState({reciver: text})}
+              onChangeText={text =>
+                this.setState({
+                  reciver: text,
+                })
+              }
             />
           </View>
           <SafeAreaView
@@ -384,20 +420,26 @@ class App extends React.Component {
                 margin: 10,
               }}
               onPress={this.createOffer}>
-              <Text style={{fontSize: 25, color: 'white'}}>call</Text>
+              <Text
+                style={{
+                  fontSize: 25,
+                  color: 'white',
+                }}>
+                call
+              </Text>
             </TouchableOpacity>
             {/* <TouchableOpacity
-              style={{
-                flex: 1,
-                borderRadius: 30,
-                borderWidth: 2,
-                height: 40,
-                alignItems: 'center',
-                margin: 10,
-              }}
-              onPress={this.createAnswer}>
-              <Text style={{fontSize: 25}}>answer</Text>
-            </TouchableOpacity> */}
+                              style={{
+                                flex: 1,
+                                borderRadius: 30,
+                                borderWidth: 2,
+                                height: 40,
+                                alignItems: 'center',
+                                margin: 10,
+                              }}
+                              onPress={this.createAnswer}>
+                              <Text style={{fontSize: 25}}>answer</Text>
+                            </TouchableOpacity> */}
           </SafeAreaView>
         </View>
       </SafeAreaView>
@@ -469,7 +511,11 @@ class MyStack extends React.Component {
           });
         }
       })
-      .then(this.setState({loading: false}))
+      .then(
+        this.setState({
+          loading: false,
+        }),
+      )
       .catch(err => {
         console.log(err);
         //console.log(this.socket)
@@ -489,7 +535,7 @@ class MyStack extends React.Component {
     console.log('ran eff');
     this.setState(
       {
-        socket: io.connect('https://8c69a4dc8501.ngrok.io/webrtcPeer', {
+        socket: io.connect('https://vcallx-web.herokuapp.com/webrtcPeer', {
           query: {},
         }),
       },

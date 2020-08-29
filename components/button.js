@@ -107,6 +107,7 @@ class Accept extends Component {
   onCall = ([y, gestureState]) => {
     if (y < -100) {
       // set(gestureState, State.END);
+      console.log('callback called! reanimated');
       this.props.callBackFunction();
     }
   };

@@ -20,8 +20,15 @@ class CallRecievedScreen extends React.Component {
     ToastAndroid.showWithGravity('connecting', ToastAndroid.SHORT);
   };
 
+  disconnect = () => {
+    this.props.navigation.navigate('home');
+    this.props.route.params.dissconect();
+  };
+
   createAnswer = () => {
-    this.setState({onConnecting: true});
+    this.setState({
+      onConnecting: true,
+    });
     this.showToastWithGravity();
     this.props.route.params.createAnswer();
   };
@@ -38,17 +45,17 @@ class CallRecievedScreen extends React.Component {
               }}
             />
           </View>
-          <Text style={styles.caller}>Nishit</Text>
+          <Text style={styles.caller}> Nishit </Text>
           <View style={styles.buttonSection}>
             <Accept
               name="phone"
               backgroundColor="#26ae60"
-              callBackFunction={this.createAnswer}
+              callBackFunction={this.props.route.params.createAnswer}
             />
             <Accept
               name="phone-hangup"
               backgroundColor="red"
-              callBackFunction={this.props.route.params.dissconect}
+              callBackFunction={this.disconnect}
             />
           </View>
         </View>
