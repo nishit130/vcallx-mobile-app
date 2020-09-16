@@ -23,21 +23,35 @@ class signupScreen extends React.Component {
   onSignup = () => {
     console.log('ran signup in signup.js true');
     if (this.state.password === this.state.confirm_password) {
-      this.props.route.params.socket.emit('addUser', {
+      this.props.route.params.socket.emit('check-user', {
         socketID: this.props.route.params.socket.id,
         username: this.state.username,
         password: this.state.password,
       });
-      var session = {
-        username: this.state.username,
-        password: this.state.password,
-      };
-      AsyncStorage.setItem('session', JSON.stringify(session));
-      this.props.route.params.onLogin(true);
     } else {
       console.log('passwords dint match !');
     }
   };
+
+  componentDidMount() {
+    this.props.route.params.socket.on('check-user', value => {
+      if (value) {
+        this.props.route.params.socket.emit('addUser', {
+          socketID: this.props.route.params.socket.id,
+          username: this.state.username,
+          password: this.state.password,
+        });
+        var session = {
+          username: this.state.username,
+          password: this.state.password,
+        };
+        AsyncStorage.setItem('session', JSON.stringify(session));
+        this.props.route.params.onLogin(true);
+      } else {
+        console.log('User with this username already exist!');
+      }
+    });
+  }
   render() {
     return (
       <View style={styles.container}>

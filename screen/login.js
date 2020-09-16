@@ -26,7 +26,7 @@ class loginScreen extends React.Component {
     };
   }
   componentDidMount() {
-    this.props.route.params.socket.on('check-user', (message, value) => {
+    this.props.route.params.socket.on('login-user', (message, value) => {
       if (value) {
         //ToastAndroid.show(message);
         console.log(message, value);
@@ -45,7 +45,7 @@ class loginScreen extends React.Component {
 
   onLogin = () => {
     console.log('ran login in login.js true');
-    this.props.route.params.socket.emit('check-user', {
+    this.props.route.params.socket.emit('login-user', {
       socketID: this.props.route.params.socket.id,
       username: this.state.username,
       password: this.state.password,

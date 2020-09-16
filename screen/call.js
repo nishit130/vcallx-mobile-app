@@ -9,7 +9,7 @@
 import 'react-native-gesture-handler';
 import React from 'react';
 import {View, Text, TouchableOpacity, Dimensions} from 'react-native';
-import {RTCView} from 'react-native-webrtc';
+import {RTCView,  MediaStreamTrack} from 'react-native-webrtc';
 
 const dimensions = Dimensions.get('window');
 
@@ -48,6 +48,15 @@ class callScreen extends React.Component {
     }
   };
 
+  Mute = () => {
+    console.log('switch camera')
+    audioTracks = this.props.route.params.localStream.getAudioTracks();
+    if (audioTracks.length > 0) {
+      console.log(`Using audio device: ${audioTracks[0].label}`);
+    }
+    // MediaStreamTrack.prototype.
+    // MediaStreamTrack.prototype._switchCamera()
+  }
   disconnect = () => {
     console.log('disconnect is called in call.js');
     this.props.route.params.pc.close();
@@ -79,6 +88,7 @@ class callScreen extends React.Component {
     const remoteVideo = remoteStream ? (
       <RTCView
         key={2}
+        audio={true}
         mirror={true}
         objectFit="contain"
         style={{
@@ -125,6 +135,7 @@ class callScreen extends React.Component {
           <RTCView
             key={1}
             objectFit="cover"
+            audio={true}
             style={{height: 200, width: 150}}
             streamURL={localStream && localStream.toURL()}
             zOrder={100}
@@ -167,7 +178,7 @@ class callScreen extends React.Component {
             }}>
             <Text
               style={{color: 'white', fontSize: 20}}
-              onPress={this.disconnect}>
+              onPress={this.Mute}>
               Mute
             </Text>
           </TouchableOpacity>

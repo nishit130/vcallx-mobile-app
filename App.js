@@ -6,7 +6,6 @@
  * @format
  * @flow strict-local
  */
-
 import React, {useEffect} from 'react';
 import {
   SafeAreaView,
@@ -136,7 +135,8 @@ class App extends React.Component {
   handleOnaddstreamEvent = e => {
     // console.log("remote srcObject", e.streams)
     //this.remoteVideoref.current.srcObject = e.stream
-    // console.log("remote stresan: " ,e.stream)
+    console.log("remote track: " ,e.track)
+
     this.setState({
       remoteStream: e.stream,
     });
@@ -157,7 +157,7 @@ class App extends React.Component {
         {
           urls: 'turn:numb.viagenie.ca',
           credential: ' ',
-          username: '@gmail.com',
+          username: '',
         },
       ],
     };
@@ -183,7 +183,7 @@ class App extends React.Component {
       }
       mediaDevices
         .getUserMedia({
-          audio: false,
+          audio: true,
           video: {
             mandatory: {
               minWidth: 500, // Provide your own width, height and frame rate here
@@ -249,6 +249,7 @@ class App extends React.Component {
     this.pc
       .createOffer({
         offerToReceiveVideo: 1,
+        offerToReceiveAudio: 1,
       })
       .then(sdp => {
         console.log(JSON.stringify(sdp));
@@ -261,6 +262,8 @@ class App extends React.Component {
         () => console.log('call sucess: '),
         err => console.log('call error: ', this.pc, err),
       );
+      console.log("muted: ")
+      this.state.localStream.getTracks().forEach(track => track.enabled = true);
   };
 
   setRemoteDescription = () => {
@@ -282,6 +285,7 @@ class App extends React.Component {
     this.pc
       .createAnswer({
         offerToReceiveVideo: 1,
+        offerToReceiveAudio: 1,
       })
       .then(sdp => {
         this.sendToPeer('offerOrAnswer', sdp, this.state.caller);
@@ -328,6 +332,7 @@ class App extends React.Component {
   };
 
   render() {
+    
     return (
       <SafeAreaView
         style={{
@@ -504,7 +509,7 @@ class MyStack extends React.Component {
         console.log('socket', this.state.socket.id);
         if (this.state.socket.id) {
           console.log('socket', this.state.socket.id);
-          this.state.socket.emit('check-user', {
+          this.state.socket.emit('login-user', {
             socketID: this.state.socket.id,
             username: session.username,
             password: session.password,
@@ -520,7 +525,7 @@ class MyStack extends React.Component {
         console.log(err);
         //console.log(this.socket)
       });
-    this.state.socket.on('check-user', (message, value) => {
+    this.state.socket.on('login-user', (message, value) => {
       if (value) {
         this.setState({
           login: true,
@@ -535,7 +540,7 @@ class MyStack extends React.Component {
     console.log('ran eff');
     this.setState(
       {
-        socket: io.connect('https://vcallx-web.herokuapp.com/webrtcPeer', {
+        socket: io.connect('https://217eedc93b71.ngrok.io/webrtcPeer', {
           query: {},
         }),
       },
@@ -563,7 +568,7 @@ class MyStack extends React.Component {
     // if (true) {
     //   return <CallRecievedScreen />;
     // } else {
-    if (false) {
+    if (!this.state.login) {
       //!this.state.login
       return (
         <AuthenticationStack

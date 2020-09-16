@@ -6,7 +6,6 @@ import signupScreen from './signup';
 
 const AuthStack = createStackNavigator();
 function AuthenticationStack(props) {
-  // const [login , setLogin] = React.useState(false);
   function onLogin(value) {
     console.log('ran login in authstack ', value);
     props.onLogin(value);
