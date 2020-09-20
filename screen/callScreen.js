@@ -45,7 +45,7 @@ class CallRecievedScreen extends React.Component {
               }}
             />
           </View>
-          <Text style={styles.caller}> Nishit </Text>
+          <Text style={styles.caller}> {this.props.route.params.caller} </Text>
           <View style={styles.buttonSection}>
             <Accept
               name="phone"

@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   AsyncStorage,
   Dimensions,
-  Image,
+  ToastAndroid,
   KeyboardAvoidingView,
 } from 'react-native';
 import {YellowBox} from 'react-native';
@@ -29,7 +29,7 @@ class signupScreen extends React.Component {
         password: this.state.password,
       });
     } else {
-      console.log('passwords dint match !');
+      ToastAndroid.show('password did not match!', ToastAndroid.SHORT);
     }
   };
 
@@ -48,7 +48,10 @@ class signupScreen extends React.Component {
         AsyncStorage.setItem('session', JSON.stringify(session));
         this.props.route.params.onLogin(true);
       } else {
-        console.log('User with this username already exist!');
+        ToastAndroid.show(
+          ' user with this username already exist! ',
+          ToastAndroid.SHORT,
+        );
       }
     });
   }

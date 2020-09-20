@@ -29,7 +29,7 @@ class loginScreen extends React.Component {
     this.props.route.params.socket.on('login-user', (message, value) => {
       if (value) {
         //ToastAndroid.show(message);
-        console.log(message, value);
+        ToastAndroid.show(message, ToastAndroid.SHORT);
         var session = {
           username: this.state.username,
           password: this.state.password,
@@ -38,6 +38,7 @@ class loginScreen extends React.Component {
         this.props.route.params.onLogin(true);
       } else {
         // ToastAndroid.show(message);
+        ToastAndroid.show(message, ToastAndroid.SHORT);
         console.log(message, value);
       }
     });

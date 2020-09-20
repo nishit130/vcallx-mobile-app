@@ -6,7 +6,8 @@
  * @format
  * @flow strict-local
  */
-import React, {useEffect} from 'react';
+
+import React from 'react';
 import {
   SafeAreaView,
   View,
@@ -14,27 +15,19 @@ import {
   TextInput,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator,
-  AsyncStorage,
   ToastAndroid,
-  Image,
-  KeyboardAvoidingView,
+  AsyncStorage,
 } from 'react-native';
 import {
   RTCPeerConnection,
   RTCIceCandidate,
   RTCSessionDescription,
-  RTCView,
-  MediaStream,
-  MediaStreamTrack,
   mediaDevices,
-  registerGlobals,
 } from 'react-native-webrtc';
 import {createStackNavigator} from '@react-navigation/stack';
 import {NavigationContainer} from '@react-navigation/native';
-import io, {Socket} from 'socket.io-client';
+import io from 'socket.io-client';
 import callScreen from './screen/call';
-// import LoginScreen from './screen/logins';
 import AuthenticationStack from './screen/authScreenStack';
 import CallRecievedScreen from './screen/callScreen';
 
@@ -67,6 +60,12 @@ class App extends React.Component {
     this.socket.on('connection-success', success => {
       console.log('success', success);
     });
+    this.socket.on('check-user', value => {
+      if (!value) {
+        console.log('user dosent exist');
+        ToastAndroid.show('user do not exist!', ToastAndroid.SHORT);
+      }
+    });
     this.socket.on('offerOrAnswer', (username, sdp) => {
       this.setState({
         caller: username,
@@ -75,6 +74,7 @@ class App extends React.Component {
         this.props.navigation.navigate('callScreen', {
           createAnswer: this.createAnswer,
           dissconect: this.disconnect,
+          caller: username,
         });
       }
       console.log('callers username is', username);
@@ -95,16 +95,16 @@ class App extends React.Component {
         this.accepted();
       }
     });
-    this.socket.on('disconnect-call', data => {
+    this.socket.on('disconnect-call', () => {
       this.disconnect();
     });
-    this.socket.on('accepted-call', data => {
+    this.socket.on('accepted-call', () => {
       this.remoteBool = true;
     });
     this.setLocalVideo();
     this.createPc();
   };
-  handleiceState = e => {
+  handleiceState = () => {
     console.log('ice state ', this.pc.iceConnectionState);
     if (
       this.pc.iceConnectionState === 'completed' ||
@@ -117,7 +117,6 @@ class App extends React.Component {
         socket: this.socket,
       });
     }
-
     if (
       this.pc.iceConnectionState === 'disconnected' ||
       this.pc.iceConnectionState === 'closed'
@@ -135,7 +134,7 @@ class App extends React.Component {
   handleOnaddstreamEvent = e => {
     // console.log("remote srcObject", e.streams)
     //this.remoteVideoref.current.srcObject = e.stream
-    console.log("remote track: " ,e.track)
+    console.log('remote track: ', e.track);
 
     this.setState({
       remoteStream: e.stream,
@@ -156,7 +155,7 @@ class App extends React.Component {
         },
         {
           urls: 'turn:numb.viagenie.ca',
-          credential: ' ',
+          credential: '',
           username: '',
         },
       ],
@@ -262,8 +261,8 @@ class App extends React.Component {
         () => console.log('call sucess: '),
         err => console.log('call error: ', this.pc, err),
       );
-      console.log("muted: ")
-      this.state.localStream.getTracks().forEach(track => track.enabled = true);
+    console.log('muted: ');
+    this.state.localStream.getTracks().forEach(track => (track.enabled = true));
   };
 
   setRemoteDescription = () => {
@@ -327,12 +326,13 @@ class App extends React.Component {
     console.log('remote', this.candidates);
   };
   logout = () => {
+    this.socket.emit('disconnect');
+    ToastAndroid.show("Logged out!",ToastAndroid.SHORT);
     AsyncStorage.removeItem('session');
     this.props.route.params.onLogin(false);
   };
 
   render() {
-    
     return (
       <SafeAreaView
         style={{
@@ -540,7 +540,7 @@ class MyStack extends React.Component {
     console.log('ran eff');
     this.setState(
       {
-        socket: io.connect('https://217eedc93b71.ngrok.io/webrtcPeer', {
+        socket: io.connect('https://88c27a12f09e.ngrok.io/webrtcPeer', {
           query: {},
         }),
       },
