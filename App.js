@@ -7,6 +7,14 @@
  * @flow strict-local
  */
 
+/*
+  TODO:
+  1.) check if user exist before calling (done)
+  2. login screen ui fixes
+  3. mute button working
+  4. if possible camera flip or switch off camera
+*/
+
 import React from 'react';
 import {
   SafeAreaView,
@@ -17,6 +25,7 @@ import {
   Dimensions,
   ToastAndroid,
   AsyncStorage,
+  ActivityIndicator,
 } from 'react-native';
 import {
   RTCPeerConnection,
@@ -30,6 +39,7 @@ import io from 'socket.io-client';
 import callScreen from './screen/call';
 import AuthenticationStack from './screen/authScreenStack';
 import CallRecievedScreen from './screen/callScreen';
+import LottieView from 'lottie-react-native';
 
 const dimensions = Dimensions.get('window');
 
@@ -327,7 +337,7 @@ class App extends React.Component {
   };
   logout = () => {
     this.socket.emit('disconnect');
-    ToastAndroid.show("Logged out!",ToastAndroid.SHORT);
+    ToastAndroid.show('Logged out!', ToastAndroid.SHORT);
     AsyncStorage.removeItem('session');
     this.props.route.params.onLogin(false);
   };
@@ -501,12 +511,19 @@ class MyStack extends React.Component {
     AsyncStorage.getItem('session')
       .then(data => {
         var session = JSON.parse(data);
+
+        console.log('socket', this.state.socket.id);
+        if (!session) {
+          console.log('animation end');
+          this.setState({
+            loading: false,
+          });
+        }
         console.log(
           'checked in async storage!',
           session.username,
           session.password,
         );
-        console.log('socket', this.state.socket.id);
         if (this.state.socket.id) {
           console.log('socket', this.state.socket.id);
           this.state.socket.emit('login-user', {
@@ -514,12 +531,17 @@ class MyStack extends React.Component {
             username: session.username,
             password: session.password,
           });
+        } else {
+          this.setState({
+            loading: false,
+          });
         }
       })
       .then(
-        this.setState({
-          loading: false,
-        }),
+        console.log('animation end'),
+        // this.setState({
+        //   loading: false,
+        // })
       )
       .catch(err => {
         console.log(err);
@@ -533,6 +555,10 @@ class MyStack extends React.Component {
       } else {
         console.log(message);
       }
+      console.log('animation end should be called');
+      this.setState({
+        loading: false,
+      });
     });
   };
 
@@ -540,7 +566,7 @@ class MyStack extends React.Component {
     console.log('ran eff');
     this.setState(
       {
-        socket: io.connect('https://88c27a12f09e.ngrok.io/webrtcPeer', {
+        socket: io.connect('https://vcallx-web.herokuapp.com/webrtcPeer', {
           query: {},
         }),
       },
@@ -548,7 +574,6 @@ class MyStack extends React.Component {
         await this.state.socket.connected;
       },
     );
-
     setTimeout(() => {
       this.check();
     }, 5000);
@@ -568,33 +593,54 @@ class MyStack extends React.Component {
     // if (true) {
     //   return <CallRecievedScreen />;
     // } else {
-    if (!this.state.login) {
-      //!this.state.login
+    if (this.state.loading) {
+      // return <ActivityIndicator size="large" />;
       return (
-        <AuthenticationStack
-          socket={this.state.socket}
-          onLogin={this.onLogin}
-        />
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'white',
+          }}>
+          <LottieView
+            style={{height: 200}}
+            size={10}
+            source={require('./assets/loading.json')}
+            autoPlay
+            loop
+          />
+          <Text style={{fontSize: 25}}>Loading...</Text>
+        </View>
       );
     } else {
-      return (
-        <NavigationContainer>
-          <Stack.Navigator headerMode="none">
-            <Stack.Screen
-              name="home"
-              component={App}
-              initialParams={{
-                socket: this.state.socket,
-                onLogin: this.onLogin,
-              }}
-            />
-            <Stack.Screen name="callScreen" component={CallRecievedScreen} />
-            <Stack.Screen name="call" component={callScreen} />
-          </Stack.Navigator>
-        </NavigationContainer>
-      );
+      if (!this.state.login) {
+        //!this.state.login
+        return (
+          <AuthenticationStack
+            socket={this.state.socket}
+            onLogin={this.onLogin}
+          />
+        );
+      } else {
+        return (
+          <NavigationContainer>
+            <Stack.Navigator headerMode="none">
+              <Stack.Screen
+                name="home"
+                component={App}
+                initialParams={{
+                  socket: this.state.socket,
+                  onLogin: this.onLogin,
+                }}
+              />
+              <Stack.Screen name="callScreen" component={CallRecievedScreen} />
+              <Stack.Screen name="call" component={callScreen} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        );
+      }
     }
-    // }
   }
 }
 

@@ -86,7 +86,7 @@ class Accept extends Component {
       eq(state, State.ACTIVE),
       [
         cond(
-          lessThan(dragY, -200),
+          lessThan(dragY, -150),
           [
             call([transY, state], this.onCall),
             cond(defined(transY), runSpring(clock, transY, dragY, 0), 0),

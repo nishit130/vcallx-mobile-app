@@ -57,14 +57,14 @@ class loginScreen extends React.Component {
       <View style={styles.container}>
         <View style={styles.banner}>
           <Image
-            style={{
-              flex: 1,
-              resizeMode: 'cover',
-            }}
-            source={require('../assets/img/video-call.png')}
+           style={{
+            flex: 1,
+            resizeMode: 'cover',
+          }}
+          source={require('../assets/img/video-call.png')}
           />
         </View>
-        <KeyboardAvoidingView behavior={'height'} style={{...styles.form}}>
+        <View style={{...styles.form}}>
           <View
             style={{
               flex: 1,
@@ -129,7 +129,7 @@ class loginScreen extends React.Component {
             onPress={() => this.props.navigation.navigate('signUp')}>
             Create Account
           </Text>
-        </KeyboardAvoidingView>
+        </View>
       </View>
     );
   }
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#314CAC',
   },
   banner: {
-    flex: 1.8,
+    flex: 1.5,
     justifyContent: 'center',
     alignItems: 'center',
   },
