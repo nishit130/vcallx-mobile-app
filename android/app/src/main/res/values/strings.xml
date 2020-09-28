@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">vcallx</string>
+    <string name="hello">Welcome to VcallX</string>
 </resources>

@@ -165,7 +165,7 @@ class callScreen extends React.Component {
               Cut
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               flex: 1,
               borderColor: 'white',
@@ -181,7 +181,7 @@ class callScreen extends React.Component {
               onPress={this.Mute}>
               Mute
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     );

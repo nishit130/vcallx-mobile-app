@@ -25,7 +25,6 @@ import {
   Dimensions,
   ToastAndroid,
   AsyncStorage,
-  ActivityIndicator,
 } from 'react-native';
 import {
   RTCPeerConnection,
@@ -40,6 +39,8 @@ import callScreen from './screen/call';
 import AuthenticationStack from './screen/authScreenStack';
 import CallRecievedScreen from './screen/callScreen';
 import LottieView from 'lottie-react-native';
+import SplashScreen from 'react-native-splash-screen';
+
 
 const dimensions = Dimensions.get('window');
 
@@ -113,6 +114,8 @@ class App extends React.Component {
     });
     this.setLocalVideo();
     this.createPc();
+
+    
   };
   handleiceState = () => {
     console.log('ice state ', this.pc.iceConnectionState);
@@ -166,7 +169,7 @@ class App extends React.Component {
         {
           urls: 'turn:numb.viagenie.ca',
           credential: '',
-          username: '',
+          username: '@gmail.com',
         },
       ],
     };
@@ -476,6 +479,10 @@ class MyStack extends React.Component {
     this.onLogin = this.onLogin.bind(this);
     // this.is_connected = this.is_connected.bind(this);
     console.log('const');
+
+    this.componentDidMount = () => {
+      SplashScreen.hide();
+    }
     // this.getData.then(() => {
     //   console.log('promise resolved');
     //   setTimeout(() => {
