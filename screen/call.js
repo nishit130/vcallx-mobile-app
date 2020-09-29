@@ -145,6 +145,7 @@ class callScreen extends React.Component {
           style={{
             flex: 1,
             flexDirection: 'row',
+            backgroundColor: 'black',
             bottom: 0,
             alignItems: 'center',
           }}>
@@ -158,7 +159,9 @@ class callScreen extends React.Component {
               borderRadius: 50,
               height: 50,
               backgroundColor: 'red',
-            }}>
+            }}
+            onPress={this.disconnect}
+            >
             <Text
               style={{color: 'white', fontSize: 20}}
               onPress={this.disconnect}>

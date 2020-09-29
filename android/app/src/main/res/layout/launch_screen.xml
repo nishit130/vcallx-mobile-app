@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     android:gravity="center"
->
-    <ImageView 
-    android:layout_width="100dp" 
-    android:layout_height="100dp" 
-    android:src="@mipmap/launch_screen" 
-    />
+    android:orientation="vertical">
+
+    <ImageView
+        android:layout_width="107dp"
+        android:layout_height="104dp"
+        android:src="@mipmap/launch_screen" />
+
     <TextView
         android:id="@+id/text_view_id"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:text="@string/hello" 
-    />
+        android:layout_height="wrap_content"
+        android:paddingTop="10dip"
+        android:text="@string/hello"
+        android:textColor="#00BCD4"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 </LinearLayout>

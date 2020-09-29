@@ -169,7 +169,7 @@ class App extends React.Component {
         {
           urls: 'turn:numb.viagenie.ca',
           credential: '',
-          username: '@gmail.com',
+          username: '',
         },
       ],
     };
@@ -181,7 +181,7 @@ class App extends React.Component {
   };
   setLocalVideo = () => {
     console.log('setLocalVideo called');
-    let isFront = false;
+    let isFront = true;
     mediaDevices.enumerateDevices().then(sourceInfos => {
       let videoSourceId;
       for (let i = 0; i < sourceInfos.length; i++) {
