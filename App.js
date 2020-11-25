@@ -40,7 +40,8 @@ import AuthenticationStack from './screen/authScreenStack';
 import CallRecievedScreen from './screen/callScreen';
 import LottieView from 'lottie-react-native';
 import SplashScreen from 'react-native-splash-screen';
-
+import NetInfo from "@react-native-community/netinfo";
+import Dialog, {DialogContent, DialogTitle} from 'react-native-popup-dialog';
 
 const dimensions = Dimensions.get('window');
 
@@ -71,10 +72,9 @@ class App extends React.Component {
     this.socket.on('connection-success', success => {
       console.log('success', success);
     });
-    this.socket.on('check-user', value => {
+    this.socket.on('check-user', (value, message) => {
       if (!value) {
-        console.log('user dosent exist');
-        ToastAndroid.show('user do not exist!', ToastAndroid.SHORT);
+        ToastAndroid.show(message, ToastAndroid.SHORT);
       }
     });
     this.socket.on('offerOrAnswer', (username, sdp) => {
@@ -114,8 +114,6 @@ class App extends React.Component {
     });
     this.setLocalVideo();
     this.createPc();
-
-    
   };
   handleiceState = () => {
     console.log('ice state ', this.pc.iceConnectionState);
@@ -168,8 +166,8 @@ class App extends React.Component {
         },
         {
           urls: 'turn:numb.viagenie.ca',
-          credential: '',
-          username: '',
+          credential: 'nishit130',
+          username: 'nishitlimbani130@gmail.com',
         },
       ],
     };
@@ -274,7 +272,6 @@ class App extends React.Component {
         () => console.log('call sucess: '),
         err => console.log('call error: ', this.pc, err),
       );
-    console.log('muted: ');
     this.state.localStream.getTracks().forEach(track => (track.enabled = true));
   };
 
@@ -446,18 +443,6 @@ class App extends React.Component {
                 call
               </Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity
-                              style={{
-                                flex: 1,
-                                borderRadius: 30,
-                                borderWidth: 2,
-                                height: 40,
-                                alignItems: 'center',
-                                margin: 10,
-                              }}
-                              onPress={this.createAnswer}>
-                              <Text style={{fontSize: 25}}>answer</Text>
-                            </TouchableOpacity> */}
           </SafeAreaView>
         </View>
       </SafeAreaView>
@@ -473,6 +458,7 @@ class MyStack extends React.Component {
       login: false,
       loading: true,
       socket: null,
+      isConnected: true,
     };
 
     this.check = this.check.bind(this);
@@ -482,38 +468,15 @@ class MyStack extends React.Component {
 
     this.componentDidMount = () => {
       SplashScreen.hide();
-    }
-    // this.getData.then(() => {
-    //   console.log('promise resolved');
-    //   setTimeout(() => {
-    //     this.check();
-    //     this.setState({loading: false});
-    //   }, 5000);
-    // });
+      const unsubscribe = NetInfo.addEventListener(state => {
+        this.setState({
+          isConnected: state.isConnected,
+        });
 
-    // this.check();
+        // console.log('')
+      });
+    };
   }
-  // UNSAFE_componentWillMount = () => {
-  //   this.setState(
-  //     {
-  //       sockte: io('https://ce58f2aa8982.ngrok.io/webrtcPeer'),
-  //     },
-  //     console.log(this.socket.id),
-  //   );
-  //   setTimeout(() => {
-  //     this.setState({loading: false});
-  //   }, 5000);
-  // };
-  // getData = new Promise((resolve, reject) => {
-  //   this.setState({
-  //     sockte: io.connect('https://ce58f2aa8982.ngrok.io/webrtcPeer', {
-  //       query: {},
-  //     }),
-  //   });
-  //   setTimeout(() => {
-  //     resolve();
-  //   }, 5000);
-  // });
   check = () => {
     AsyncStorage.getItem('session')
       .then(data => {
@@ -610,6 +573,13 @@ class MyStack extends React.Component {
             justifyContent: 'center',
             backgroundColor: 'white',
           }}>
+          <Dialog
+            visible={!this.state.isConnected}
+            dialogTitle={<DialogTitle title="Internet is Disconnected" />}>
+            <DialogContent>
+              <Text> turn on net and Restart app</Text>
+            </DialogContent>
+          </Dialog>
           <LottieView
             style={{height: 200}}
             size={10}

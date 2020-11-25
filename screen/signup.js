@@ -34,7 +34,7 @@ class signupScreen extends React.Component {
   };
 
   componentDidMount() {
-    this.props.route.params.socket.on('check-user', value => {
+    this.props.route.params.socket.on('check-user', (value, message) => {
       if (value) {
         this.props.route.params.socket.emit('addUser', {
           socketID: this.props.route.params.socket.id,

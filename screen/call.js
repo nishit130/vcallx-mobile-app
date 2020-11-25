@@ -9,7 +9,7 @@
 import 'react-native-gesture-handler';
 import React from 'react';
 import {View, Text, TouchableOpacity, Dimensions} from 'react-native';
-import {RTCView,  MediaStreamTrack} from 'react-native-webrtc';
+import {RTCView, MediaStreamTrack} from 'react-native-webrtc';
 
 const dimensions = Dimensions.get('window');
 
@@ -49,14 +49,14 @@ class callScreen extends React.Component {
   };
 
   Mute = () => {
-    console.log('switch camera')
+    console.log('switch camera');
     audioTracks = this.props.route.params.localStream.getAudioTracks();
     if (audioTracks.length > 0) {
       console.log(`Using audio device: ${audioTracks[0].label}`);
     }
     // MediaStreamTrack.prototype.
     // MediaStreamTrack.prototype._switchCamera()
-  }
+  };
   disconnect = () => {
     console.log('disconnect is called in call.js');
     this.props.route.params.pc.close();
@@ -115,12 +115,6 @@ class callScreen extends React.Component {
             height: dimensions.height - 100,
             width: dimensions.width,
           }}>
-          {/* <RTCView 
-            key={2}
-            objectFit='cover'
-            style={{height:dimensions.height,width:dimensions.width}}
-            streamURL={localStream && localStream.toURL()}
-            /> */}
           {remoteVideo}
         </View>
         <View
@@ -160,15 +154,14 @@ class callScreen extends React.Component {
               height: 50,
               backgroundColor: 'red',
             }}
-            onPress={this.disconnect}
-            >
+            onPress={this.disconnect}>
             <Text
               style={{color: 'white', fontSize: 20}}
               onPress={this.disconnect}>
               Cut
             </Text>
           </TouchableOpacity>
-          {/* <TouchableOpacity
+          <TouchableOpacity
             style={{
               flex: 1,
               borderColor: 'white',
@@ -179,12 +172,10 @@ class callScreen extends React.Component {
               height: 50,
               backgroundColor: 'grey',
             }}>
-            <Text
-              style={{color: 'white', fontSize: 20}}
-              onPress={this.Mute}>
+            <Text style={{color: 'white', fontSize: 20}} onPress={this.Mute}>
               Mute
             </Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
       </View>
     );
